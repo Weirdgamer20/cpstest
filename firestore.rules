@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // UserProfile Validation
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'xp', 'totalTests', 'bestCps', 'avgCps']) &&
+             data.keys().size() == 6 &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() <= 200 &&
+             data.xp is int && data.xp >= 0 &&
+             data.totalTests is int && data.totalTests >= 0 &&
+             data.bestCps is number && data.bestCps >= 0.0 &&
+             data.avgCps is number && data.avgCps >= 0.0;
+    }
+
+    // ClickRecord Validation
+    function isValidClickRecord(data) {
+      return data.keys().hasAll(['id', 'date', 'duration', 'clicks', 'cps', 'type']) &&
+             data.keys().size() == 6 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.date is string && data.date.size() <= 50 &&
+             data.duration is string && data.duration.size() <= 20 &&
+             data.clicks is int && data.clicks >= 0 && data.clicks <= 3500 && // Safeguard limit (max 3500 clicks per session)
+             data.cps is number && data.cps >= 0.0 && data.cps <= 35.0 && // Safeguard impossible speeds (max 35 CPS)
+             data.type is string && data.type.size() <= 50;
+    }
+
+    // Users Collection rules
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserProfile(request.resource.data) &&
+                      request.resource.data.uid == resource.data.uid; // prevent changing UID
+      allow delete: if false; // profiles cannot be deleted from the client SDK
+
+      // Records subcollection
+      match /records/{recordId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(recordId) && isValidClickRecord(request.resource.data);
+        allow update: if isOwner(userId) && isValidId(recordId) && isValidClickRecord(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

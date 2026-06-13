@@ -1,0 +1,6 @@
+# robots.txt for Chronos Arena (https://cpstest.chronosarena.com)
+User-agent: *
+Allow: /
+
+# Sitemap Location
+Sitemap: https://cpstest.chronosarena.com/sitemap.xml

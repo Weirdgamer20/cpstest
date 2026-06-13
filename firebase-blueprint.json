@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile state tracking XP and speed metrics",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The Firebase Auth UID of the user"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's registered email"
+        },
+        "xp": {
+          "type": "integer",
+          "description": "Total user Experience Points"
+        },
+        "totalTests": {
+          "type": "integer",
+          "description": "Total tests completed"
+        },
+        "bestCps": {
+          "type": "number",
+          "description": "All time maximum clicks per second accomplished"
+        },
+        "avgCps": {
+          "type": "number",
+          "description": "Average clicks per second"
+        }
+      },
+      "required": ["uid", "email", "xp", "totalTests", "bestCps", "avgCps"]
+    },
+    "ClickRecord": {
+      "title": "ClickRecord",
+      "description": "A single click speed test record logged by the user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the record"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of testing format (M/D/YYYY)"
+        },
+        "duration": {
+          "type": "string",
+          "description": "Test duration (e.g., '1s', '5s')"
+        },
+        "clicks": {
+          "type": "integer",
+          "description": "Total clicks registered"
+        },
+        "cps": {
+          "type": "number",
+          "description": "Calculated clicks per second"
+        },
+        "type": {
+          "type": "string",
+          "description": "Test type (e.g., cps, jitter, kohi, spacebar)"
+        }
+      },
+      "required": ["id", "date", "duration", "clicks", "cps", "type"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores individual user profile state matching the Firebase UID"
+    },
+    "/users/{userId}/records/{recordId}": {
+      "schema": "ClickRecord",
+      "description": "Stores click records history subcollection for each authenticated user"
+    }
+  }
+}

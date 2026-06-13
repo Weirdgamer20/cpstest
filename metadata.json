@@ -1,0 +1,6 @@
+{
+  "name": "CPSTEST - Click Speed Test & Gaming Utilities",
+  "description": "A high-performance dark-themed gaming tool with Click Speed Test, Jitter test, Kohi test, Typing speed test, Spacebar and Simulation clickers, Coreball mini-game, Reaction time, and Cupcakes 2048.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
